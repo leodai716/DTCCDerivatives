@@ -1,4 +1,4 @@
-## This file is scripted for studying DTCC FX derivatives data 
+## This file is scripted for studying DTCC FX derivatives data
 start_time <- Sys.time()
 ## init
 # install.packages('dataonderivatives')
@@ -18,8 +18,8 @@ OptionStockdb_EndDate <- Sys.Date()
 ### Step 1 Define function for data scraping and cleaning
 
 getDTCCdata <- function(start, end){
-  
-  # a. create empty data frame 
+
+  # a. create empty data frame
   DTCCdb.temp <- data.frame(matrix(nrow = 0, ncol = 45))
   colnames(DTCCdb.temp) <- c( "DISSEMINATION_ID",                                   "ORIGINAL_DISSEMINATION_ID",                          "ACTION",
                               "EXECUTION_TIMESTAMP",                                "CLEARED",                                            "INDICATION_OF_COLLATERALIZATION",
@@ -35,11 +35,11 @@ getDTCCdata <- function(start, end){
                               "OPTION_STRIKE_PRICE",                                "OPTION_TYPE",                                        "OPTION_FAMILY",
                               "OPTION_CURRENCY",                                    "OPTION_PREMIUM",                                     "OPTION_LOCK_PERIOD",
                               "OPTION_EXPIRATION_DATE",                             "PRICE_NOTATION2_TYPE",                               "PRICE_NOTATION2",
-                              "PRICE_NOTATION3_TYPE",                               "PRICE_NOTATION3",                                    "TRANSACTION_RECORD_DATE"     
+                              "PRICE_NOTATION3_TYPE",                               "PRICE_NOTATION3",                                    "TRANSACTION_RECORD_DATE"
                               )
-  
-  
-  
+
+
+
   # b. data scraping
   dbDateRange <- seq(start, end, 'days')
   for (d in 1:length(dbDateRange)){
@@ -52,21 +52,21 @@ getDTCCdata <- function(start, end){
       Sys.sleep(1)
     }
   }
-  
-  
-  
+
+
+
   # c. data cleaning
   #removing special character
   DTCCdb.temp$ROUNDED_NOTIONAL_AMOUNT_1 <- gsub("[+ ,]", "", as.character(DTCCdb.temp$ROUNDED_NOTIONAL_AMOUNT_1))
   DTCCdb.temp$ROUNDED_NOTIONAL_AMOUNT_2 <- gsub("[+ ,]", "", as.character(DTCCdb.temp$ROUNDED_NOTIONAL_AMOUNT_2))
-  
+
   # change data type
   DTCCdb.temp$ROUNDED_NOTIONAL_AMOUNT_1 <- as.double(DTCCdb.temp$ROUNDED_NOTIONAL_AMOUNT_1)
   DTCCdb.temp$ROUNDED_NOTIONAL_AMOUNT_2 <- as.double(DTCCdb.temp$ROUNDED_NOTIONAL_AMOUNT_2)
-  
+
   DTCCdb.temp$EFFECTIVE_DATE <- as.Date(DTCCdb.temp$EFFECTIVE_DATE)
   DTCCdb.temp$END_DATE <- as.Date(DTCCdb.temp$END_DATE)
-  
+
   # d. return DTCCdb.temp
   return(DTCCdb.temp)
 }
@@ -79,10 +79,10 @@ getDTCCdata <- function(start, end){
 getHKDUSDOptiondata <- function(dataDTCC){
   # set filter criteria
   filter_criteria <- (((dataDTCC$NOTIONAL_CURRENCY_1 == "HKD" & dataDTCC$NOTIONAL_CURRENCY_2 == "USD")|(dataDTCC$NOTIONAL_CURRENCY_1 == "USD" & dataDTCC$NOTIONAL_CURRENCY_2 == "HKD")) & dataDTCC$TAXONOMY == "ForeignExchange:VanillaOption"  & dataDTCC$ACTION == "NEW")
-  
+
   # filter  the data
   DTCC_HKDUSDOption_db.temp <- dataDTCC[which(filter_criteria),]
-  
+
   # extra cleaning
   # denominating in USD
   DTCC_HKDUSDOption_db.temp$NOTIONAL_USD <- ifelse(DTCC_HKDUSDOption_db.temp$NOTIONAL_CURRENCY_1 == "USD", DTCC_HKDUSDOption_db.temp$ROUNDED_NOTIONAL_AMOUNT_1,
@@ -96,20 +96,20 @@ getHKDUSDOptiondata <- function(dataDTCC){
                                                              )
                                                       )
   )
-  
+
   return(DTCC_HKDUSDOption_db.temp)
 }
 
 
 ### Step 3 define function for getting stock option data
 getHKDUSDOptiontockdata <- function(dataDTCCHKDUSDOption, start, end){
-  # create empty df 
+  # create empty df
   HKDUSDOptiontockdb.temp <- data.frame(matrix(nrow = 0, ncol = 13))
-  colnames(HKDUSDOptiontockdb.temp) <- c('date', 
-                                         'CALL >= 7.85','CALL >= 7.85 %', 'CALL 7.75 - 7.85','CALL 7.75 - 7.85 %', 'CALL <= 7.75', 'CALL <= 7.75 %',  
+  colnames(HKDUSDOptiontockdb.temp) <- c('date',
+                                         'CALL >= 7.85','CALL >= 7.85 %', 'CALL 7.75 - 7.85','CALL 7.75 - 7.85 %', 'CALL <= 7.75', 'CALL <= 7.75 %',
                                          'PUT >= 7.85', 'PUT >= 7.85 %', 'PUT 7.75 - 7.85', 'PUT 7.75 - 7.85 %', 'PUT <= 7.75', 'PUT <= 7.75 %')
-  
-  # loop through to get stock info 
+
+  # loop through to get stock info
   # WB = weakbound, IR = in-range, SB = strong-bound
   dbDateRange <- seq(start, end, 'days')
   for (d in 1: length(dbDateRange)){
@@ -151,23 +151,23 @@ getHKDUSDOptiontockdata <- function(dataDTCCHKDUSDOption, start, end){
     P_IR_pct <- P_IR/(P_WB+P_IR+P_SB)
     P_SB_pct <- P_SB/(P_WB+P_IR+P_SB)
     # create temp df
-    HKDUSDOptiontockdta.temp <- data.frame('date' = DATE, 
-                                           'CALL >= 7.85' = C_WB,'CALL >= 7.85 %' = C_WB_pct, 'CALL 7.75 - 7.85' = C_IR,'CALL 7.75 - 7.85 %' = C_IR_pct, 'CALL <= 7.75' = C_SB, 'CALL <= 7.75 %' = C_SB_pct,  
+    HKDUSDOptiontockdta.temp <- data.frame('date' = DATE,
+                                           'CALL >= 7.85' = C_WB,'CALL >= 7.85 %' = C_WB_pct, 'CALL 7.75 - 7.85' = C_IR,'CALL 7.75 - 7.85 %' = C_IR_pct, 'CALL <= 7.75' = C_SB, 'CALL <= 7.75 %' = C_SB_pct,
                                            'PUT >= 7.85' = P_WB, 'PUT >= 7.85 %' = P_WB_pct, 'PUT 7.75 - 7.85' = P_IR, 'PUT 7.75 - 7.85 %' = P_IR_pct, 'PUT <= 7.75' = P_SB, 'PUT <= 7.75 %' = P_SB_pct)
-    
+
     # append data
     HKDUSDOptiontockdb.temp <- rbind(HKDUSDOptiontockdb.temp, HKDUSDOptiontockdta.temp)
   }
-  
-  
+
+
   #USD Billion
-  
+
   HKDUSDOptiontockdb.temp[,c(2,4,6,8,10,12)] <- data.frame(lapply(HKDUSDOptiontockdb.temp[,c(2,4,6,8,10,12)], function(x){x/1000000000}))
-  
-  
+
+
   # significant figures
   HKDUSDOptiontockdb.temp[,c(2,4,6,8,10,12)] <- data.frame(lapply(HKDUSDOptiontockdb.temp[,c(2,4,6,8,10,12)], function(x){signif(x, 3)}))
-  
+
   #return db
   return(HKDUSDOptiontockdb.temp)
 }
@@ -181,16 +181,16 @@ getHKDUSDOptiontockdata <- function(dataDTCCHKDUSDOption, start, end){
 # colnames(DTCC_HKDUSDOption_Stock_db) <- c('date',
 #                                           'CALL >= 7.85','CALL >= 7.85 %', 'CALL 7.75 - 7.85','CALL 7.75 - 7.85 %', 'CALL <= 7.75', 'CALL <= 7.75 %',
 #                                           'PUT >= 7.85', 'PUT >= 7.85 %', 'PUT 7.75 - 7.85', 'PUT 7.75 - 7.85 %', 'PUT <= 7.75', 'PUT <= 7.75 %')
-# 
+#
 # saveRDS(DTCCdb, file = "D:/R/DTCC Transaction/DTCCdb_FX.rds")
 # saveRDS(DTCC_HKDUSDOption_db, file = "D:/R/DTCC Transaction/DTCC_HKDUSDOption_db.rds")
 # saveRDS(DTCC_HKDUSDOption_Stock_db, file = "D:/R/DTCC Transaction/DTCC_HKDUSDOption_Stock_db.rds")
 # fwrite(DTCC_HKDUSDOption_Stock_db, file = "D:/R/DTCC Transaction/DTCC_HKDUSDOption_Stock_db.csv")
 
 
-### Step 5 updating database 
+### Step 5 updating database
 
-#import existing files 
+#import existing files
 DTCCdb <- readRDS("D:/R/DTCC Transaction/DTCCdb_FX.rds")
 DTCC_HKDUSDOption_db <- readRDS("D:/R/DTCC Transaction/DTCC_HKDUSDOption_db.rds")
 DTCC_HKDUSDOption_Stock_db <- readRDS("D:/R/DTCC Transaction/DTCC_HKDUSDOption_Stock_db.rds")
@@ -204,16 +204,16 @@ DTCCdb_append_EndDate <- Sys.Date() -1
 t <- try(seq(DTCCdb_append_StartDate, DTCCdb_append_EndDate, by = 'days'))
 if( class(t) == "try-error" ) {
   q(save = 'no')
-}  
+}
 
 DTCCdb.append <- getDTCCdata(DTCCdb_append_StartDate, DTCCdb_append_EndDate)
 
 if(nrow(DTCCdb.append) > 0) {
   DTCCdb <- rbind(DTCCdb, DTCCdb.append)
   DTCCdb <- readRDS("D:/R/DTCC Transaction/DTCCdb_FX.rds")
-  
-  
-  
+
+
+
   # update DTCC_HKDUSDOption_db
   DTCC_HKDUSDOption_db.append <- getHKDUSDOptiondata(dataDTCC = DTCCdb.append)
   if(nrow(DTCC_HKDUSDOption_db.append) > 0 {
@@ -231,7 +231,7 @@ Stockdb_EndDate <- Sys.Date() -1
 t <- try(seq(Stockdb_StartDate, Stockdb_EndDate, by = 'days'))
 if( class(t) == "try-error" ) {
   q(save = 'no')
-}  
+}
 
 DTCC_HKDUSDOption_Stock_db.append <- getHKDUSDOptiontockdata(dataDTCCHKDUSDOption = DTCC_HKDUSDOption_db, start = Stockdb_StartDate, end = Stockdb_EndDate)
 colnames(DTCC_HKDUSDOption_Stock_db.append) <- c('date',
