@@ -9,9 +9,9 @@ library(data.table)
 
 ################ Inputs ################
 DTCCdb_StartDate <- as.Date('2017-01-01')
-DTCCdb_EndDate <- Sys.Date()-3
+DTCCdb_EndDate <- Sys.Date()-1
 OptionStockdb_StartDate <- as.Date('2019-01-01')
-OptionStockdb_EndDate <- Sys.Date() -3
+OptionStockdb_EndDate <- Sys.Date()
 ########################################
 
 
@@ -192,11 +192,11 @@ getHKDUSDOptiontockdata <- function(dataDTCCHKDUSDOption, start, end){
 
 #import existing files
 DTCCdb <- readRDS("D:/Projects/DTCCDerivatives/DTCCdb_FX.rds")
-DTCCdb <- DTCCdb[which(DTCCdb$TRANSACTION_RECORD_DATE < max(DTCCdb$TRANSACTION_RECORD_DATE)-5 ),]
+DTCCdb <- DTCCdb[which(DTCCdb$TRANSACTION_RECORD_DATE < max(DTCCdb$TRANSACTION_RECORD_DATE)-3 ),]
 DTCC_HKDUSDOption_db <- readRDS("D:/Projects/DTCCDerivatives/DTCC_HKDUSDOption_db.rds")
-DTCC_HKDUSDOption_db <- DTCC_HKDUSDOption_db[which(DTCC_HKDUSDOption_db$TRANSACTION_RECORD_DATE < max(DTCC_HKDUSDOption_db$TRANSACTION_RECORD_DATE)-5),]
+DTCC_HKDUSDOption_db <- DTCC_HKDUSDOption_db[which(DTCC_HKDUSDOption_db$TRANSACTION_RECORD_DATE < max(DTCC_HKDUSDOption_db$TRANSACTION_RECORD_DATE)-3),]
 DTCC_HKDUSDOption_Stock_db <- readRDS("D:/Projects/DTCCDerivatives/DTCC_HKDUSDOption_Stock_db.rds")
-DTCC_HKDUSDOption_Stock_db <- DTCC_HKDUSDOption_Stock_db[which(DTCC_HKDUSDOption_Stock_db$date < max(DTCC_HKDUSDOption_Stock_db$date)-5),]
+DTCC_HKDUSDOption_Stock_db <- DTCC_HKDUSDOption_Stock_db[which(DTCC_HKDUSDOption_Stock_db$date < max(DTCC_HKDUSDOption_Stock_db$date)-3),]
 
 
 
@@ -213,7 +213,7 @@ DTCCdb.append <- getDTCCdata(DTCCdb_append_StartDate, DTCCdb_append_EndDate)
 
 if(nrow(DTCCdb.append) > 0) {
   DTCCdb <- rbind(DTCCdb, DTCCdb.append)
-  DTCCdb <- saveRDS("D:/Projects/DTCCDerivatives/DTCCdb_FX.rds")
+  DTCCdb <- saveRDS(DTCCdb, "D:/Projects/DTCCDerivatives/DTCCdb_FX.rds")
 
 
 
@@ -229,7 +229,7 @@ if(nrow(DTCCdb.append) > 0) {
 
 # update DTCC_HKDUSDOption_Stock_db
 Stockdb_StartDate <- max(DTCC_HKDUSDOption_Stock_db$date)+1
-Stockdb_EndDate <- Sys.Date() -3
+Stockdb_EndDate <- Sys.Date()
 
 t <- try(seq(Stockdb_StartDate, Stockdb_EndDate, by = 'days'))
 if( class(t) == "try-error" ) {
