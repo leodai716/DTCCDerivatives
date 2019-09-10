@@ -9,9 +9,9 @@ library(data.table)
 
 ################ Inputs ################
 DTCCdb_StartDate <- as.Date('2017-01-01')
-DTCCdb_EndDate <- Sys.Date()-1
+DTCCdb_EndDate <- Sys.Date()-3
 OptionStockdb_StartDate <- as.Date('2019-01-01')
-OptionStockdb_EndDate <- Sys.Date()
+OptionStockdb_EndDate <- Sys.Date() -3
 ########################################
 
 
@@ -182,18 +182,21 @@ getHKDUSDOptiontockdata <- function(dataDTCCHKDUSDOption, start, end){
 #                                           'CALL >= 7.85','CALL >= 7.85 %', 'CALL 7.75 - 7.85','CALL 7.75 - 7.85 %', 'CALL <= 7.75', 'CALL <= 7.75 %',
 #                                           'PUT >= 7.85', 'PUT >= 7.85 %', 'PUT 7.75 - 7.85', 'PUT 7.75 - 7.85 %', 'PUT <= 7.75', 'PUT <= 7.75 %')
 #
-# saveRDS(DTCCdb, file = "D:/R/DTCC Transaction/DTCCdb_FX.rds")
-# saveRDS(DTCC_HKDUSDOption_db, file = "D:/R/DTCC Transaction/DTCC_HKDUSDOption_db.rds")
-# saveRDS(DTCC_HKDUSDOption_Stock_db, file = "D:/R/DTCC Transaction/DTCC_HKDUSDOption_Stock_db.rds")
-# fwrite(DTCC_HKDUSDOption_Stock_db, file = "D:/R/DTCC Transaction/DTCC_HKDUSDOption_Stock_db.csv")
+# saveRDS(DTCCdb, file = "D:/Projects/DTCCDerivatives/DTCCdb_FX.rds")
+# saveRDS(DTCC_HKDUSDOption_db, file = "D:/Projects/DTCCDerivatives/DTCC_HKDUSDOption_db.rds")
+# saveRDS(DTCC_HKDUSDOption_Stock_db, file = "D:/Projects/DTCCDerivatives/DTCC_HKDUSDOption_Stock_db.rds")
+# fwrite(DTCC_HKDUSDOption_Stock_db, file = "D:/Projects/DTCCDerivatives/DTCC_HKDUSDOption_Stock_db.csv")
 
 
 ### Step 5 updating database
 
 #import existing files
-DTCCdb <- readRDS("D:/R/DTCC Transaction/DTCCdb_FX.rds")
-DTCC_HKDUSDOption_db <- readRDS("D:/R/DTCC Transaction/DTCC_HKDUSDOption_db.rds")
-DTCC_HKDUSDOption_Stock_db <- readRDS("D:/R/DTCC Transaction/DTCC_HKDUSDOption_Stock_db.rds")
+DTCCdb <- readRDS("D:/Projects/DTCCDerivatives/DTCCdb_FX.rds")
+DTCCdb <- DTCCdb[which(DTCCdb$TRANSACTION_RECORD_DATE < max(DTCCdb$TRANSACTION_RECORD_DATE)-5 ),]
+DTCC_HKDUSDOption_db <- readRDS("D:/Projects/DTCCDerivatives/DTCC_HKDUSDOption_db.rds")
+DTCC_HKDUSDOption_db <- DTCC_HKDUSDOption_db[which(DTCC_HKDUSDOption_db$TRANSACTION_RECORD_DATE < max(DTCC_HKDUSDOption_db$TRANSACTION_RECORD_DATE)-5),]
+DTCC_HKDUSDOption_Stock_db <- readRDS("D:/Projects/DTCCDerivatives/DTCC_HKDUSDOption_Stock_db.rds")
+DTCC_HKDUSDOption_Stock_db <- DTCC_HKDUSDOption_Stock_db[which(DTCC_HKDUSDOption_Stock_db$date < max(DTCC_HKDUSDOption_Stock_db$date)-5),]
 
 
 
@@ -210,23 +213,23 @@ DTCCdb.append <- getDTCCdata(DTCCdb_append_StartDate, DTCCdb_append_EndDate)
 
 if(nrow(DTCCdb.append) > 0) {
   DTCCdb <- rbind(DTCCdb, DTCCdb.append)
-  DTCCdb <- readRDS("D:/R/DTCC Transaction/DTCCdb_FX.rds")
+  DTCCdb <- saveRDS("D:/Projects/DTCCDerivatives/DTCCdb_FX.rds")
 
 
 
   # update DTCC_HKDUSDOption_db
   DTCC_HKDUSDOption_db.append <- getHKDUSDOptiondata(dataDTCC = DTCCdb.append)
-  if(nrow(DTCC_HKDUSDOption_db.append) > 0 {
+  if(nrow(DTCC_HKDUSDOption_db.append) > 0) {
     DTCC_HKDUSDOption_db <- rbind(DTCC_HKDUSDOption_db, DTCC_HKDUSDOption_db.append)
-    saveRDS(DTCC_HKDUSDOption_db, file = "D:/R/DTCC Transaction/DTCC_HKDUSDOption_db.rds")
-  })
+    saveRDS(DTCC_HKDUSDOption_db, file = "D:/Projects/DTCCDerivatives/DTCC_HKDUSDOption_db.rds")
+  }
 }
 
 
 
 # update DTCC_HKDUSDOption_Stock_db
 Stockdb_StartDate <- max(DTCC_HKDUSDOption_Stock_db$date)+1
-Stockdb_EndDate <- Sys.Date() -1
+Stockdb_EndDate <- Sys.Date() -3
 
 t <- try(seq(Stockdb_StartDate, Stockdb_EndDate, by = 'days'))
 if( class(t) == "try-error" ) {
@@ -238,8 +241,8 @@ colnames(DTCC_HKDUSDOption_Stock_db.append) <- c('date',
                                           'CALL >= 7.85','CALL >= 7.85 %', 'CALL 7.75 - 7.85','CALL 7.75 - 7.85 %', 'CALL <= 7.75', 'CALL <= 7.75 %',
                                           'PUT >= 7.85', 'PUT >= 7.85 %', 'PUT 7.75 - 7.85', 'PUT 7.75 - 7.85 %', 'PUT <= 7.75', 'PUT <= 7.75 %')
 DTCC_HKDUSDOption_Stock_db <- rbind(DTCC_HKDUSDOption_Stock_db, DTCC_HKDUSDOption_Stock_db.append)
-saveRDS(DTCC_HKDUSDOption_Stock_db, file = "D:/R/DTCC Transaction/DTCC_HKDUSDOption_Stock_db.rds")
-fwrite(DTCC_HKDUSDOption_Stock_db, file = "D:/R/DTCC Transaction/DTCC_HKDUSDOption_Stock_db.csv")
+saveRDS(DTCC_HKDUSDOption_Stock_db, file = "D:/Projects/DTCCDerivatives/DTCC_HKDUSDOption_Stock_db.rds")
+fwrite(DTCC_HKDUSDOption_Stock_db, file = "D:/Projects/DTCCDerivatives/DTCC_HKDUSDOption_Stock_db.csv")
 
 
 #############################################################
