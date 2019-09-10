@@ -1,5 +1,5 @@
 ## This file is scripted for studying DTCC FX derivatives data
-start_time <- Sys.time()
+# start_time <- Sys.time()
 ## init
 # install.packages('dataonderivatives')
 # install.packages('data.table')
