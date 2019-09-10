@@ -10,7 +10,7 @@ library(dataonderivatives)
 #################### Inputs ####################
 DTCCdb_StartDate <- as.Date('2017-01-01')
 DTCCdb_EndDate <- Sys.Date() -3
-AssetClass <- 'CO'
+AssetClass 
 ################################################
 
 
